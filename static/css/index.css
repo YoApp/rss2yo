@@ -1,0 +1,48 @@
+html, body{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: 'Montserrat', arial, sans-serif;
+    background-color: #9B59B6;
+    color: white;
+    text-align: center;
+}
+
+
+#content {
+    height: 50%;
+    width: 50%;
+    background-color: #7B4890;
+    border-radius: 20px;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.input:focus{
+    border: none;   
+    outline: none;   
+    border-bottom: 1px dashed #999;
+}
+.input{
+    background: none;
+    border: none;
+    border-bottom: 1px dashed #999;
+    color: white;
+    width: 180px;
+}
+
+#error{
+    text-decoration: underline;
+    display: none;
+}
+
+a{
+    color: white;
+    text-decoration: underline;
+}
+
+hr{
+    width: 50%;   
+}

@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+    <head>
+        <title>RSS 2 Yo</title>
+
+        <link href="static/css/index.css" rel="stylesheet">
+    </head>
+    
+    <body>
+        
+        <div id="content">
+            <h1>Notify people with Yo.</h1>
+            
+            <p id="desc"></p>
+            
+            <div id="error">Unable to parse RSS</div><br>
+            <div class="row"><span class="label">RSS Feed:</span> <input class="input" id="url" placeholder="http://mysite.com/feed.rss"></div>
+            <div class="row"><span class="label">Yo API Key (<a href="http://dev.justyo.co/">get one here</a>):</span> <input class="input" id="apikey" placeholder="xx-xx-xx-xx-xx"></div>
+            <br>
+            <button onclick="submit();" id="submit">Yo!</button>
+            
+            <br>
+            <hr>
+            <br>
+            
+            <div class="row"><span class="label">Reset your broadcasts:</span> <input class="input" id="reset-api" placeholder="xx-xx-xx-xx-xx"></div>
+            <br>
+            <button onclick="reset();" id="reset">Yo!</button>
+        </div>
+        
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="static/js/index.js"></script>
+    </body>
+</html>
