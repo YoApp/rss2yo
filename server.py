@@ -7,56 +7,63 @@ import datetime
 import dateutil.parser as parser #install
 
 
+
 print "restarted"
 
 def checkRSS(entry):
-    #print entry
+    print entry
 
-    feed = feedparser.parse(entry['url'])
+    def parseRSS(resp):
+        try:
+            feed = feedparser.parse(resp.body)
 
-    if entry['datetime'] != '':
+            if entry['datetime'] != '':
 
-        if parser.parse(entry['datetime']) < parser.parse(feed['items'][0]['published']):
-            print("new")
+                if parser.parse(entry['datetime']) < parser.parse(feed['items'][0]['published']):
+                    print("new")
 
-            #Send the Yo
-            client = httpclient.HTTPClient()
-            req = httpclient.HTTPRequest("http://api.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey'])
-            resp = client.fetch(req)
+                    #Send the Yo
+                    client = httpclient.HTTPClient()
+                    req = httpclient.HTTPRequest("http://api.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey'])
+                    resp = client.fetch(req)
 
-            #print(resp)
-
-
-
-            if 'id' in feed['items'][0]:
-                id = feed['items'][0]['id']
-            elif 'title' in feed['items'][0]:
-                id = feed['items'][0]['title']
-
-            date = feed['items'][0]['published']
-
-            mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, id, entry['id'])
+                    #print(resp)
 
 
 
+                    if 'id' in feed['items'][0]:
+                        id = feed['items'][0]['id']
+                    elif 'title' in feed['items'][0]:
+                        id = feed['items'][0]['title']
 
-    else:
-        if 'id' in feed['items'][0]:
-            id = feed['items'][0]['id']
-        elif 'title' in feed['items'][0]:
-            id = feed['items'][0]['title']
+                    date = feed['items'][0]['published']
 
-        if entry['lastid'] != id:
-            print("new")
+                    mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, id, entry['id'])
+            else:
+                if 'id' in feed['items'][0]:
+                    id = feed['items'][0]['id']
+                elif 'title' in feed['items'][0]:
+                    id = feed['items'][0]['title']
 
-            #Send the Yo
-            client = httpclient.HTTPClient()
-            req = httpclient.HTTPRequest("http://api.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey'])
-            resp = client.fetch(req)
+                if entry['lastid'] != id:
+                    print("new")
 
-            mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
+                    #Send the Yo
+                    client = httpclient.HTTPClientHTTPClient()
+                    req = httpclient.HTTPRequest("http://api.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey'])
 
-            #ToDo: Yoall
+                    mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
+        except Exception:
+            pass
+
+
+    try:
+        client = httpclient.AsyncHTTPClient()
+        client.fetch(entry['url'], parseRSS)
+    except Exception:
+        pass
+
+
 
 
 @gen.engine
@@ -86,6 +93,21 @@ class IndexHandler(web.RequestHandler):
 
         url = self.get_argument("url", strip=True)
         apikey = self.get_argument("apikey", strip=True)
+
+        q = mysql.query("SELECT * FROM feeds WHERE apikey=%s AND url=%s", apikey,url)
+
+
+        if len(q) != 0:
+            self.write('{"error":"Already exists"}')
+            return
+
+        query = mysql.query("SELECT * FROM feeds WHERE apikey=%s", apikey)
+        if len(query) >= 10:
+            self.write('{"error":"Too many broadcasts."}')
+            return
+
+        print(q)
+
 
         print(url, apikey)
 
@@ -149,13 +171,12 @@ class DeleteFeeds(web.RequestHandler):
         self.write('{}')
 
 
-
-
-
-
 try:
     #Connect to SQL
-    mysql = torndb.Connection("localhost", "yo2rss", user="root", password="")
+
+    sqlpass = open("pass").read()
+
+    mysql = torndb.Connection("localhost", "yo2rss", user="root", password=sqlpass)
     q = open("feeds.sql").read()
     try:
         pass
