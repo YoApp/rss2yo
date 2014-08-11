@@ -11,7 +11,7 @@ import dateutil.parser as parser #install
 print "restarted"
 
 def checkRSS(entry):
-    print entry
+    #print entry
 
     def parseRSS(resp):
         try:
@@ -106,10 +106,10 @@ class IndexHandler(web.RequestHandler):
             self.write('{"error":"Too many broadcasts."}')
             return
 
-        print(q)
+        #print(q)
 
 
-        print(url, apikey)
+        #print(url, apikey)
 
         if apikey == '' or url == '':
             self.write('{"error":"Pleae don\'t leave blank fields"}')
@@ -167,13 +167,12 @@ class DeleteFeeds(web.RequestHandler):
             return
 
         row = mysql.execute("DELETE FROM feeds WHERE apikey=%s", apikey)
-        print(row)
+        #print(row)
         self.write('{}')
 
 
 try:
     #Connect to SQL
-
     mysql = torndb.Connection("localhost", "yo2rss", user="root", password="")
     q = open("feeds.sql").read()
     try:
