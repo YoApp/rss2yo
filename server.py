@@ -79,7 +79,7 @@ def crawlRSS():
             pass
 
     print "waiting"
-    yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 30)
+    yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 1)
     crawlRSS()
 
 
