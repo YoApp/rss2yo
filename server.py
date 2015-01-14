@@ -173,7 +173,7 @@ class DeleteFeeds(web.RequestHandler):
 
 try:
     #Connect to SQL
-    mysql = torndb.Connection("localhost", "yo2rss", user="root", password="")
+    mysql = torndb.Connection("host=us-cdbr-iron-east-01.cleardb.net", "heroku_1b6ef821ac71ff5", user="bb1624dc5468e6", password="4293f1a6")
     q = open("feeds.sql").read()
     try:
         pass
