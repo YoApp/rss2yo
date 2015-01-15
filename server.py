@@ -1,4 +1,5 @@
 from tornado import ioloop, web, escape, gen, httpclient #install
+from MySQLdb import OperationalError
 import torndb #install
 import feedparser #install
 import sys
@@ -8,11 +9,9 @@ import dateutil.parser as parser #install
 import os
 
 
-
 print "restarted"
 
 def checkRSS(entry):
-    print entry['url']
     # print 'checking'
     def parseRSS(resp):
         try:
@@ -26,10 +25,7 @@ def checkRSS(entry):
                 published_time = feed['items'][0]['published']
                 published_url = feed['items'][0]['link']
                 if parser.parse(entry_datetime) < parser.parse(published_time) and published_url != entry_url:
-                    print("new")
-                    #Send the Yo
-                    print published_url
-                    print entry_url
+
 
                     client = httpclient.HTTPClient()
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
@@ -42,7 +38,6 @@ def checkRSS(entry):
                     elif 'title' in feed['items'][0]:
                         id = feed['items'][0]['title']
 
-                    print id
                     date = feed['items'][0]['published']
                     print 'mysql updated'
                     print entry['id']
@@ -59,8 +54,7 @@ def checkRSS(entry):
 
                 entry_url = entry['lastid']
                 link = feed['items'][0]['link']
-                print entry_url
-                print link
+
                 if entry['lastid'] != id and entry_url != link:
                     # print("new")
                     print '{} sent {}'.format(source, feed['items'][0]['link'])
@@ -72,7 +66,7 @@ def checkRSS(entry):
 
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, link, entry['id'])
         except Exception as e:
-            print "ERR {} {}".format(e, entry)
+            print "Err1 {} {}".format(e, entry)
             pass
 
 
@@ -80,7 +74,7 @@ def checkRSS(entry):
         client = httpclient.AsyncHTTPClient()
         client.fetch(entry['url'], parseRSS)
     except Exception as e:
-        print '{} {}'.format(e, entry)
+        print 'Err2 {} {}'.format(e, entry)
         pass
 
 
@@ -89,18 +83,25 @@ def checkRSS(entry):
 @gen.engine
 def crawlRSS():
     # print("here")
-    res = mysql.query("SELECT * FROM feeds")
-    for entry in res:
-        try:
-            checkRSS(entry)
-        except Exception as e:
-            print(e)
-            pass
+    mysql.reconnect()
+    try:
+        res = mysql.query("SELECT * FROM feeds")
+    except OperationalError:
+        mysql.reconnect()
+        res = []
+        print 'failed connection'
+    finally:
+        for entry in res:
+            try:
+                checkRSS(entry)
+            except Exception as e:
+                print(e)
+                pass
 
-    # print "waiting"
-    yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 30)
-    print 'crawling'
-    crawlRSS()
+        # print "waiting"
+        yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 30)
+        print 'crawling'
+        crawlRSS()
 
 
 
@@ -206,7 +207,6 @@ try:
 
 except Exception as e:
     print(e)
-    mysql = torndb.Connection("us-cdbr-iron-east-01.cleardb.net", "heroku_1b6ef821ac71ff5", user="bb1624dc5468e6", password="4293f1a6")
 
 app = web.Application([
      (r'/', IndexHandler),
@@ -218,7 +218,6 @@ app = web.Application([
 
 if __name__ == '__main__':
     app.listen(int(os.environ.get('PORT', '5000')))
-    mysql.reconnect()
     crawlRSS()
     ioloop.IOLoop.instance().start()
 
