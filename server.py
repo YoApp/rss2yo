@@ -24,7 +24,7 @@ def checkRSS(entry):
 
                     #Send the Yo
                     client = httpclient.HTTPClient()
-                    req = httpclient.HTTPRequest("http://api.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
+                    req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     resp = client.fetch(req)
 
                     #print(resp)
@@ -50,7 +50,7 @@ def checkRSS(entry):
 
                     #Send the Yo
                     client = httpclient.HTTPClientHTTPClient()
-                    req = httpclient.HTTPRequest("http://api.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
+                    req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
 
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
         except Exception:
@@ -79,7 +79,7 @@ def crawlRSS():
             pass
 
     print "waiting"
-    yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 1)
+    yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 30)
     crawlRSS()
 
 
