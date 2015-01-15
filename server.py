@@ -28,12 +28,15 @@ def checkRSS(entry):
                 if parser.parse(entry_datetime) < parser.parse(published_time) and published_url != entry_url:
                     # print("new")
                     #Send the Yo
+                    print '{} sent {}'.format(source, feed['items'][0]['link'])
                     client = httpclient.HTTPClient()
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     resp = client.fetch(req)
 
                     if 'link' in feed['items'][0]:
                         id = feed['items'][0]['link']
+                    elif 'id' in feed['items'][0]:
+                        id = feed['items'][0]['id']
                     elif 'title' in feed['items'][0]:
                         id = feed['items'][0]['title']
 
@@ -43,12 +46,14 @@ def checkRSS(entry):
             else:
                 if 'link' in feed['items'][0]:
                     id = feed['items'][0]['link']
+                elif 'id' in feed['items'][0]:
+                    id = feed['items'][0]['id']
                 elif 'title' in feed['items'][0]:
                     id = feed['items'][0]['title']
 
                 if entry['lastid'] != id:
                     # print("new")
-                    print 'sendyo2'
+                    print '{} sent {}'.format(source, feed['items'][0]['link'])
                     #Send the Yo
                     client = httpclient.HTTPClient()
                     # print 'New feed item found for {}'.format(apikey)
@@ -139,7 +144,9 @@ class IndexHandler(web.RequestHandler):
                 published = ''
 
 
-            if 'id' in f['items'][0]:
+            if 'link' in f['items'][0]:
+                id = f['items'][0]['link']
+            elif 'id' in f['items'][0]:
                 id = f['items'][0]['id']
             elif 'title' in f['items'][0]:
                 id = f['items'][0]['title']
