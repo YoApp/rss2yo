@@ -24,7 +24,7 @@ def checkRSS(entry):
 
                     #Send the Yo
                     client = httpclient.HTTPClient()
-                    req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
+                    req = httpclient.HTTPRequest("http://newpi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     resp = client.fetch(req)
 
                     #print(resp)
@@ -68,7 +68,7 @@ def checkRSS(entry):
 
 @gen.engine
 def crawlRSS():
-    print("here")
+    # print("here")
     res = mysql.query("SELECT * FROM feeds")
 
     for entry in res:
@@ -78,7 +78,7 @@ def crawlRSS():
             print(e)
             pass
 
-    print "waiting"
+    # print "waiting"
     yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 30)
     crawlRSS()
 
