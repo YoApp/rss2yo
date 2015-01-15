@@ -57,6 +57,7 @@ def checkRSS(entry):
 
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
         except Exception:
+            print "ERR"
             pass
 
 
