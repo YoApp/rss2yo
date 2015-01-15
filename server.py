@@ -175,6 +175,7 @@ class DeleteFeeds(web.RequestHandler):
 try:
     #Connect to SQL
     mysql = torndb.Connection("us-cdbr-iron-east-01.cleardb.net", "heroku_1b6ef821ac71ff5", user="bb1624dc5468e6", password="4293f1a6")
+    print 'connected'
     q = open("feeds.sql").read()
     try:
         pass
