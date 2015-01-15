@@ -20,8 +20,10 @@ def checkRSS(entry):
             
             if entry['datetime'] != '':
                 entry_datetime = entry['datetime']
+                entry_url = entry['lastid']
                 published_time = feed['items'][0]['published']
-                if parser.parse(entry_datetime) < parser.parse(published_time):
+                published_url = feed['items'][0]['link']
+                if parser.parse(entry_datetime) < parser.parse(published_time) and published_url != entry_url:
                     # print("new")
                     #Send the Yo
                     client = httpclient.HTTPClient()
