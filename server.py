@@ -70,10 +70,12 @@ def checkRSS(entry):
 @gen.engine
 def crawlRSS():
     # print("here")
+    print 'crawling'
     res = mysql.query("SELECT * FROM feeds")
 
     for entry in res:
         try:
+            print 'Checking {}'.format(entry)
             checkRSS(entry)
         except Exception as e:
             print(e)
@@ -81,6 +83,7 @@ def crawlRSS():
 
     # print "waiting"
     yield gen.Task(ioloop.IOLoop.instance().add_timeout, time.time() + 30)
+    print 'crawling'
     crawlRSS()
 
 
@@ -105,6 +108,7 @@ class IndexHandler(web.RequestHandler):
         query = mysql.query("SELECT * FROM feeds WHERE apikey=%s", apikey)
         if len(query) >= 10:
             self.write('{"error":"Too many broadcasts."}')
+            print "TOO MANY BROADCASTS FOR {}".format(apikey)
             return
 
         #print(q)
