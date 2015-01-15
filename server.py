@@ -25,6 +25,7 @@ def checkRSS(entry):
 
                     #Send the Yo
                     client = httpclient.HTTPClient()
+                    print 'New feed item found for {}'.format(apikey)
                     req = httpclient.HTTPRequest("http://newpi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     resp = client.fetch(req)
 
@@ -51,6 +52,7 @@ def checkRSS(entry):
 
                     #Send the Yo
                     client = httpclient.HTTPClientHTTPClient()
+                    print 'New feed item found for {}'.format(apikey)
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
 
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
@@ -75,7 +77,6 @@ def crawlRSS():
 
     for entry in res:
         try:
-            print 'Checking {}'.format(entry)
             checkRSS(entry)
         except Exception as e:
             print(e)
