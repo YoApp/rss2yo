@@ -17,6 +17,8 @@ def checkRSS(entry):
     def parseRSS(resp):
         try:
             feed = feedparser.parse(resp.body)
+            source = entry['url'].split('.')[1]
+
             
             if entry['datetime'] != '':
                 entry_datetime = entry['datetime']
@@ -29,11 +31,10 @@ def checkRSS(entry):
                     client = httpclient.HTTPClient()
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     resp = client.fetch(req)
-                    print 'respsent'
-                    #print(resp)
-
-                    print feed['items'][0]
-                    if 'id' in feed['items'][0]:
+                    
+                    if source == 'marketwatch':
+                        id = feed['items'][0]['link']
+                    elif 'id' in feed['items'][0]:
                         id = feed['items'][0]['id']
                     elif 'title' in feed['items'][0]:
                         id = feed['items'][0]['title']
