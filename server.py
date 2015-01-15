@@ -12,34 +12,32 @@ import os
 print "restarted"
 
 def checkRSS(entry):
-    #print entry
-
+    print entry['url']
+    # print 'checking'
     def parseRSS(resp):
         try:
             feed = feedparser.parse(resp.body)
-
+            
             if entry['datetime'] != '':
-
-                if parser.parse(entry['datetime']) < parser.parse(feed['items'][0]['published']):
+                entry_datetime = entry['datetime']
+                published_time = feed['items'][0]['published']
+                if parser.parse(entry_datetime) < parser.parse(published_time):
                     # print("new")
-
                     #Send the Yo
                     client = httpclient.HTTPClient()
-                    print 'New feed item found for {}'.format(apikey)
-                    req = httpclient.HTTPRequest("http://newpi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
+                    req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     resp = client.fetch(req)
-
+                    print 'respsent'
                     #print(resp)
 
-
-
+                    print feed['items'][0]
                     if 'id' in feed['items'][0]:
                         id = feed['items'][0]['id']
                     elif 'title' in feed['items'][0]:
                         id = feed['items'][0]['title']
 
                     date = feed['items'][0]['published']
-
+                    print 'mysql updated'
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, id, entry['id'])
             else:
                 if 'id' in feed['items'][0]:
@@ -49,7 +47,7 @@ def checkRSS(entry):
 
                 if entry['lastid'] != id:
                     # print("new")
-
+                    print 'sendyo2'
                     #Send the Yo
                     client = httpclient.HTTPClientHTTPClient()
                     print 'New feed item found for {}'.format(apikey)
@@ -57,14 +55,15 @@ def checkRSS(entry):
 
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
         except Exception as e:
-            print "ERR {}".format(e)
+            print "ERR {} {}".format(e, entry)
             pass
 
 
     try:
         client = httpclient.AsyncHTTPClient()
         client.fetch(entry['url'], parseRSS)
-    except Exception:
+    except Exception as e:
+        print '{} {}'.format(e, entry)
         pass
 
 
@@ -73,9 +72,7 @@ def checkRSS(entry):
 @gen.engine
 def crawlRSS():
     # print("here")
-    print 'crawling'
     res = mysql.query("SELECT * FROM feeds")
-
     for entry in res:
         try:
             checkRSS(entry)
