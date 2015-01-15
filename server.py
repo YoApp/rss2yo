@@ -41,8 +41,8 @@ def checkRSS(entry):
                     print 'mysql updated'
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, id, entry['id'])
             else:
-                if 'id' in feed['items'][0]:
-                    id = feed['items'][0]['id']
+                if 'link' in feed['items'][0]:
+                    id = feed['items'][0]['link']
                 elif 'title' in feed['items'][0]:
                     id = feed['items'][0]['title']
 
@@ -50,8 +50,8 @@ def checkRSS(entry):
                     # print("new")
                     print 'sendyo2'
                     #Send the Yo
-                    client = httpclient.HTTPClientHTTPClient()
-                    print 'New feed item found for {}'.format(apikey)
+                    client = httpclient.HTTPClient()
+                    # print 'New feed item found for {}'.format(apikey)
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
 
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
@@ -175,7 +175,6 @@ class DeleteFeeds(web.RequestHandler):
         #print(row)
         self.write('{}')
 
-
 try:
     #Connect to SQL
     mysql = torndb.Connection("us-cdbr-iron-east-01.cleardb.net", "heroku_1b6ef821ac71ff5", user="bb1624dc5468e6", password="4293f1a6")
@@ -189,7 +188,7 @@ try:
 
 except Exception as e:
     print(e)
-    sys.exit("Error: Could not connect to MySQL.")
+    mysql = torndb.Connection("us-cdbr-iron-east-01.cleardb.net", "heroku_1b6ef821ac71ff5", user="bb1624dc5468e6", password="4293f1a6")
 
 app = web.Application([
      (r'/', IndexHandler),
@@ -201,6 +200,7 @@ app = web.Application([
 
 if __name__ == '__main__':
     app.listen(int(os.environ.get('PORT', '5000')))
+    mysql.reconnect()
     crawlRSS()
     ioloop.IOLoop.instance().start()
 
