@@ -194,7 +194,7 @@ app = web.Application([
 ], debug=True)
 
 if __name__ == '__main__':
-    app.listen(int(os.environ.get('PORT', '5000')))
+    app.listen(options.port)
     crawlRSS()
     ioloop.IOLoop.instance().start()
 
