@@ -56,8 +56,8 @@ def checkRSS(entry):
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
 
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", "", id, entry['id'])
-        except Exception:
-            print "ERR"
+        except Exception as e:
+            print "ERR {}".format(e)
             pass
 
 
