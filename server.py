@@ -5,6 +5,7 @@ import sys
 import time
 import datetime
 import dateutil.parser as parser #install
+import os
 
 
 
@@ -194,7 +195,7 @@ app = web.Application([
 ], debug=True)
 
 if __name__ == '__main__':
-    app.listen(options.port)
+    app.listen(int(os.environ.get('PORT', '5000')))
     crawlRSS()
     ioloop.IOLoop.instance().start()
 
