@@ -31,11 +31,9 @@ def checkRSS(entry):
                     client = httpclient.HTTPClient()
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     resp = client.fetch(req)
-                    
-                    if source == 'marketwatch':
+
+                    if 'link' in feed['items'][0]:
                         id = feed['items'][0]['link']
-                    elif 'id' in feed['items'][0]:
-                        id = feed['items'][0]['id']
                     elif 'title' in feed['items'][0]:
                         id = feed['items'][0]['title']
 
