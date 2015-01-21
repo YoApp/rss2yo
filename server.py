@@ -16,20 +16,32 @@ def checkRSS(entry):
     def parseRSS(resp):
         try:
             feed = feedparser.parse(resp.body)
-            source = entry['url'].split('.')[1]
+
 
             
             if entry['datetime'] != '':
+
                 entry_datetime = entry['datetime']
                 entry_url = entry['lastid']
-                published_time = feed['items'][0]['published']
                 published_url = feed['items'][0]['link']
-                if parser.parse(entry_datetime) < parser.parse(published_time) and published_url != entry_url:
 
+
+                if published_url != entry_url:
 
                     client = httpclient.HTTPClient()
-                    req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
-                    resp = client.fetch(req)
+                    try:
+                        req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', user_agent='rssyo.com (new)', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
+                        resp = client.fetch(req)
+                        source = entry['url'].split('.')[1]
+                        print 'Yo sent by {}'.format(source)
+                    except Exception as e:
+                        print 'Failed yo {}'.format(e)
+                    
+
+                    print 'Prev datetime: {}'.format(entry_datetime)
+                    # print 'New datetime: {}'.format(published_time)
+                    print 'New entry url: {}'.format(published_url)
+                    print 'Prev entry url: {}'.format(entry_url)
 
                     if 'link' in feed['items'][0]:
                         id = feed['items'][0]['link']
@@ -38,11 +50,17 @@ def checkRSS(entry):
                     elif 'title' in feed['items'][0]:
                         id = feed['items'][0]['title']
 
-                    date = feed['items'][0]['published']
-                    print 'mysql updated'
+
+                    if 'published' in feed['items'][0]:
+                        date = feed['items'][0]['published']
+                    else:
+                        date = datetime.datetime.today()
                     print entry['id']
-                    print '{} sent {}'.format(source, feed['items'][0]['link'])
+
+                    print '*** pre mysql update (if statement) ***'
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, published_url, entry['id'])
+                    print 'MYSQL UPDATED IN IF'
+
             else:
                 print 'else'
                 if 'link' in feed['items'][0]:
@@ -53,20 +71,35 @@ def checkRSS(entry):
                     id = feed['items'][0]['title']
 
                 entry_url = entry['lastid']
-                link = feed['items'][0]['link']
-
+                if 'link' in feed['items'][0]:
+                    link = feed['items'][0]['link']
+                else:
+                    print feed['items'][0]
                 if entry['lastid'] != id and entry_url != link:
-                    # print("new")
-                    print '{} sent {}'.format(source, feed['items'][0]['link'])
+                    
+
+
+
+                    print 'New entry url: {}'.format(link)
+                    print 'Prev entry url: {}'.format(entry_url)
+                    print 
+
                     #Send the Yo
                     client = httpclient.HTTPClient()
                     # print 'New feed item found for {}'.format(apikey)
-                    date = feed['items'][0]['published']
-                    req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
 
+                    if 'published' in feed['items'][0]:
+                        date = feed['items'][0]['published']
+                    else:
+                        date = datetime.datetime.today()
+                    req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', user_agent='rssyo.com (new)', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
+                    print '*** Pre SQL update ***'
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, link, entry['id'])
+                    print 'MYSQL UPDATED IN ELSE'
+                    source = entry['url'].split('.')[1]
+                    print '{} sent {}'.format(source, feed['items'][0]['link'])
+
         except Exception as e:
-            print "Err1 {} {}".format(e, entry)
             pass
 
 
