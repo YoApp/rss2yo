@@ -17,15 +17,28 @@ def checkRSS(entry):
         try:
             feed = feedparser.parse(resp.body)
 
+            apikey = entry['apikey']
+            published_url = feed['items'][0]['link']
 
-            
+            # check if already sent this link
+
+            try:
+                querystring = 'SELECT * FROM links WHERE apikey={} and link={}'.format(apikey, published_url)
+                res = mysql.query(querystring)
+            except OperationalError:
+                mysql.reconnect()
+                res = []
+                print 'failed connection'
+            finally:
+                for links in res:
+                    temp_link = links['link']
+                    if published_url == temp_link:
+                        return
+
             if entry['datetime'] != '':
 
                 entry_datetime = entry['datetime']
                 entry_url = entry['lastid']
-                published_url = feed['items'][0]['link']
-
-
                 if published_url != entry_url:
 
                     client = httpclient.HTTPClient()
@@ -36,7 +49,6 @@ def checkRSS(entry):
                         print 'Yo sent by {}'.format(source)
                     except Exception as e:
                         print 'Failed yo {}'.format(e)
-                    
 
                     print 'Prev datetime: {}'.format(entry_datetime)
                     # print 'New datetime: {}'.format(published_time)
@@ -59,6 +71,8 @@ def checkRSS(entry):
 
                     print '*** pre mysql update (if statement) ***'
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, published_url, entry['id'])
+                    mysql.execute("INSERT links SET apikey=%s, link=%s", apikey, published_url)
+
                     print 'MYSQL UPDATED IN IF'
 
             else:
@@ -76,13 +90,10 @@ def checkRSS(entry):
                 else:
                     print feed['items'][0]
                 if entry['lastid'] != id and entry_url != link:
-                    
-
-
 
                     print 'New entry url: {}'.format(link)
                     print 'Prev entry url: {}'.format(entry_url)
-                    print 
+                    print
 
                     #Send the Yo
                     client = httpclient.HTTPClient()
@@ -95,6 +106,7 @@ def checkRSS(entry):
                     req = httpclient.HTTPRequest("http://newapi.justyo.co/yoall/", method='POST', user_agent='rssyo.com (new)', body="api_token="+entry['apikey']+"&link="+feed['items'][0]['link'])
                     print '*** Pre SQL update ***'
                     mysql.execute("UPDATE feeds SET datetime=%s, lastid=%s WHERE id=%s", date, link, entry['id'])
+                    mysql.execute("INSERT links SET apikey=%s, link=%s", apikey, published_url)
                     print 'MYSQL UPDATED IN ELSE'
                     source = entry['url'].split('.')[1]
                     print '{} sent {}'.format(source, feed['items'][0]['link'])
