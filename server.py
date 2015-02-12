@@ -21,19 +21,15 @@ def checkRSS(entry):
             published_url = feed['items'][0]['link']
 
             # check if already sent this link
-
             try:
                 querystring = 'SELECT * FROM links WHERE apikey={} and link={}'.format(apikey, published_url)
                 res = mysql.query(querystring)
-            except OperationalError:
-                mysql.reconnect()
-                res = []
-                print 'failed connection'
-            finally:
                 for links in res:
                     temp_link = links['link']
                     if published_url == temp_link:
                         return
+            except:
+                print 'No links for user in links db'
 
             if entry['datetime'] != '':
 
