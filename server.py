@@ -24,12 +24,14 @@ def checkRSS(entry):
             try:
                 querystring = 'SELECT * FROM links WHERE apikey={} and link={}'.format(apikey, published_url)
                 res = mysql.query(querystring)
+            except OperationalError:
+                print 'Reconnecting to db'
+                mysql.reconnect()
+            finally:
                 for links in res:
                     temp_link = links['link']
                     if published_url == temp_link:
                         return
-            except:
-                print 'No links for user in links db'
 
             if entry['datetime'] != '':
 
